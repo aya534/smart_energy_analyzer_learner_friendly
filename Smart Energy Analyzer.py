@@ -12,12 +12,53 @@ BUDGET= 50
 TIER_LIMIT = 300
 TIER_MULTIPLIER = 1.5
 
+def calc_cost(monthly_kwh, price):
+     if monthly_kwh <= TIER_LIMIT:
+        cost = monthly_kwh * price
+     else:
+        normal_part = TIER_LIMIT * price
+        extra_part = (monthly_kwh - TIER_LIMIT) * price * TIER_MULTIPLIER
+        cost = normal_part + extra_part
+     return cost
+
+def search_appliance():
+    name = input("Enter the name of the appliance to search for: ").strip().title()
+    if name in names:
+        index = names.index(name)
+        print(f"Appliance found: {name}")
+        print(f"Power (watts): {watts_list[index]}")
+        print(f"Hours per day: {hours_list[index]}")
+        print(f"Daily energy (kWh): {kwh_daily_list[index]}")
+    else:
+        print(f"{name} not found in the list of appliances.")
+
+def full_report():
+    if len(names)==0:
+        print("No appliances added yet.")
+        return
+    else:
+        print("-" * 40)
+        print("Appliance Report")
+        print("-" * 40)
+        for i in range(len(names)):
+            share= kwh_daily_list[i] / total_daily_kwh * 100
+            print( i+1, names[i], "-", kwh_daily_list[i], "kWh/day,", f"{share:.2f}%", "of total daily energy")
+        print("-" * 40)
+        print("Total:", round(total_daily_kwh, 2), "kWh/day")
+        print("Estimated monthly cost:", round(total_daily_kwh * DAYS * price, 2), "USD")
+        top_i= kwh_daily_list.index(max(kwh_daily_list))
+        print("Biggest energy consumer:", names[top_i])
+        saved_kwh= watts_list[top_i] /1000 * DAYS
+        print("Tip: You can save", round(saved_kwh, 2), "kWh/month by unplugging", names[top_i], "One hour a day.")
+
 #Menu for the user
 while True:
       print()
       print("1. Add Appliance")
       print("2. View total")
-      print("3. Exit")
+      print("3. Search for appliance")
+      print("4. Full report")
+      print("5. Exit")
       choice= input("Enter your choice: ")
 
       #The process of adding an appliance
@@ -52,12 +93,7 @@ while True:
       #The process of viewing total
       elif choice == "2":
             monthly_kwh= total_daily_kwh * DAYS
-            if monthly_kwh <= TIER_LIMIT:
-                cost = monthly_kwh * price
-            else:
-                normal_part = TIER_LIMIT * price
-                extra_part = (monthly_kwh - TIER_LIMIT) * price * TIER_MULTIPLIER
-                cost = normal_part + extra_part
+            cost= calc_cost(monthly_kwh, price)
 
             print("Appliances:", count)
             print("Monthly energy:", monthly_kwh, "Kwh")
@@ -81,8 +117,14 @@ while True:
                     longest= n
             print("Longest name:", longest, "-", len(longest), "letters")
 
+      elif choice == "3":
+           search_appliance()
+
+      elif choice =="4":
+              full_report()
+
       #stopping the program
-      elif choice =="3":
+      elif choice =="5":
            print("See you later!")
            break
 
