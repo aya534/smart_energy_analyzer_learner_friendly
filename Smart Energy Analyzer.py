@@ -51,6 +51,26 @@ def full_report():
         saved_kwh= watts_list[top_i] /1000 * DAYS
         print("Tip: You can save", round(saved_kwh, 2), "kWh/month by unplugging", names[top_i], "One hour a day.")
 
+def find_me():
+    if len(names) == 0:
+        print("No appliances added yet.")
+        return
+    # dictionary: name -> daily kWh
+    energy = {}
+    for i in range(len(names)):
+        energy[names[i]] = kwh_daily_list[i]
+    # set: the names she asks for, no duplicates
+    wanted = set()
+    for w in input("Appliances to find (comma separated): ").split(","):
+        if w.strip() != "":
+            wanted.add(w.strip().title())
+    found = wanted & set(energy)
+    missing = wanted - set(energy)
+    for name in sorted(found):
+        print("Found:", name, "-", round(energy[name], 2), "kWh/day")
+    if len(missing) > 0:
+        print("Not found:", ", ".join(sorted(missing)))
+
 #Menu for the user
 while True:
       print()
@@ -59,6 +79,7 @@ while True:
       print("3. Search for appliance")
       print("4. Full report")
       print("5. Exit")
+      print("6. Find me")
       choice= input("Enter your choice: ")
 
       #The process of adding an appliance
@@ -127,6 +148,9 @@ while True:
       elif choice =="5":
            print("See you later!")
            break
+
+      elif choice == "6":
+           find_me()
 
       else:
            print("Invalid choice. Please try again.")
