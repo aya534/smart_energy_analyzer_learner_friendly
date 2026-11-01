@@ -52,24 +52,24 @@ def full_report():
         print("Tip: You can save", round(saved_kwh, 2), "kWh/month by unplugging", names[top_i], "One hour a day.")
 
 def find_me():
-    if len(names) == 0:
-        print("No appliances added yet.")
-        return
-    # dictionary: name -> daily kWh
-    energy = {}
-    for i in range(len(names)):
-        energy[names[i]] = kwh_daily_list[i]
-    # set: the names she asks for, no duplicates
-    wanted = set()
-    for w in input("Appliances to find (comma separated): ").split(","):
-        if w.strip() != "":
-            wanted.add(w.strip().title())
-    found = wanted & set(energy)
-    missing = wanted - set(energy)
-    for name in sorted(found):
-        print("Found:", name, "-", round(energy[name], 2), "kWh/day")
-    if len(missing) > 0:
-        print("Not found:", ", ".join(sorted(missing)))
+     if len(names)==0:
+            print("No appliances added yet.")
+            return
+     energy= {}
+     for i in range(len(names)):
+          energy[names[i]] = kwh_daily_list[i]
+
+     wanted= set()
+     for w in input("Appliances to find (separate by a comma): ").split(","):
+          if w.strip() != "":
+                wanted.add(w.strip().title())
+     found= wanted & set(energy)
+     missing= wanted - set(energy)
+
+     for name in sorted(found):
+          print("Found:",name, "-", energy[name], "kWh/day")
+     if len(missing) > 0:
+          print("Not found:", ", ".join(sorted(missing)))
 
 #Menu for the user
 while True:
@@ -78,8 +78,8 @@ while True:
       print("2. View total")
       print("3. Search for appliance")
       print("4. Full report")
-      print("5. Exit")
-      print("6. Find me")
+      print("5. find appliance")
+      print("6. Exit")
       choice= input("Enter your choice: ")
 
       #The process of adding an appliance
@@ -144,13 +144,13 @@ while True:
       elif choice =="4":
               full_report()
 
-      #stopping the program
       elif choice =="5":
+           find_me()
+
+      #stopping the program
+      elif choice =="6":
            print("See you later!")
            break
-
-      elif choice == "6":
-           find_me()
 
       else:
            print("Invalid choice. Please try again.")
