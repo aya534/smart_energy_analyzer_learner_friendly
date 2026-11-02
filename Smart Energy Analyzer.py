@@ -52,24 +52,62 @@ def full_report():
         print("Tip: You can save", round(saved_kwh, 2), "kWh/month by unplugging", names[top_i], "One hour a day.")
 
 def find_me():
-     if len(names)==0:
-            print("No appliances added yet.")
-            return
-     energy= {}
-     for i in range(len(names)):
-          energy[names[i]] = kwh_daily_list[i]
+    if len(names) == 0:
+        print("No appliances added yet.")
+        return
+    # dictionary: name -> daily kWh
+    energy = {}
+    for i in range(len(names)):
+        energy[names[i]] = kwh_daily_list[i]
+    # set: the names she asks for, no duplicates
+    wanted = set()
+    for w in input("Appliances to find (comma separated): ").split(","):
+        if w.strip() != "":
+            wanted.add(w.strip().title())
+    found = wanted & set(energy)
+    missing = wanted - set(energy)
+    for name in sorted(found):
+        print("Found:", name, "-", round(energy[name], 2), "kWh/day")
+    if len(missing) > 0:
+        print("Not found:", ", ".join(sorted(missing)))
 
-     wanted= set()
-     for w in input("Appliances to find (separate by a comma): ").split(","):
-          if w.strip() != "":
-                wanted.add(w.strip().title())
-     found= wanted & set(energy)
-     missing= wanted - set(energy)
+def budget_check():
+    if len(names) == 0:
+        print("No appliances added yet.")
+        return
+    my_budget = float(input("Your monthly budget (USD): "))
+    while my_budget <= 0:
+        print("Budget must be more than 0!")
+        my_budget = float(input("Your monthly budget (USD): "))
+    monthly_kwh = total_daily_kwh * DAYS
+    cost = round(calc_cost(monthly_kwh, price), 2)
+    # percent of the budget used
+    used = round(cost / my_budget * 100)
+    # how far from the budget, over or under
+    gap = round(abs(my_budget - cost), 2)
+    print("Monthly cost:", cost, "USD")
+    print(f"Budget used: {used}%")
+    if cost > my_budget:
+        print("Over budget by", gap, "USD")
+    else:
+        print("Under budget by", gap, "USD")
 
-     for name in sorted(found):
-          print("Found:",name, "-", energy[name], "kWh/day")
-     if len(missing) > 0:
-          print("Not found:", ", ".join(sorted(missing)))
+def days_left(money, day_cost, days):
+    # base case: the month is over, or the money ran out
+    if days == 0 or money < day_cost:
+        return 0
+    # recursive step: pay for one day, then ask again
+    return 1 + days_left(round(money - day_cost, 2), day_cost, days - 1)
+
+def money_days():
+    if len(names) == 0:
+        print("No appliances added yet.")
+        return
+    money = float(input("Money left for energy (USD): "))
+    day_cost = round(calc_cost(total_daily_kwh * DAYS, price) / DAYS, 2)
+    days = days_left(money, day_cost, DAYS)
+    print("One day costs", day_cost, "USD")
+    print("Your money lasts", days, "of", DAYS, "days")
 
 #Menu for the user
 while True:
@@ -78,8 +116,10 @@ while True:
       print("2. View total")
       print("3. Search for appliance")
       print("4. Full report")
-      print("5. find appliance")
-      print("6. Exit")
+      print("5. Exit")
+      print("6. Find me")
+      print("7. Budget check")
+      print("9. Days left")
       choice= input("Enter your choice: ")
 
       #The process of adding an appliance
@@ -144,13 +184,19 @@ while True:
       elif choice =="4":
               full_report()
 
-      elif choice =="5":
-           find_me()
-
       #stopping the program
-      elif choice =="6":
+      elif choice =="5":
            print("See you later!")
            break
+
+      elif choice == "6":
+           find_me()
+
+      elif choice == "7":
+           budget_check()
+
+      elif choice == "9":
+           money_days()
 
       else:
            print("Invalid choice. Please try again.")
